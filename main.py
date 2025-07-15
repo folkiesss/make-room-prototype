@@ -100,9 +100,36 @@ class Client(commands.Bot):
         else:
             await interaction.response.send_message("No category named 'MakeRoom' found.", ephemeral=True)
 
+    async def on_voice_state_update(self, member, before, after):
+        if after.channel is not None and after.channel.name == "+ Create Room":
+            await self.create_new_room(member, after)
+        
+        # Check if a user left a voice channel and if the channel is empty, delete it
+        if before.channel is not None and before.channel.name.endswith("'s Room") and len(before.channel.members) == 0:
+            await before.channel.delete()
+
+    async def create_new_room(self, member, after):
+        guild = member.guild
+        category = after.channel.category
+        channel_name = f"🏠 {member.name}'s Room"
+        
+        # Check if a channel with the same name already exists
+        existing_channel = discord.utils.get(guild.voice_channels, name=channel_name, category=category)
+        if existing_channel:
+            await member.move_to(existing_channel)
+            return
+
+        try:
+            new_channel = await guild.create_voice_channel(name=channel_name, category=category)
+            await member.move_to(new_channel)
+        except discord.Forbidden:
+            # Handle the case where the bot doesn't have permissions
+            print(f"I do not have permission to create voice channels in {guild.name}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
 intents = discord.Intents.default()
 intents.message_content = True
 
 client = Client(command_prefix='!', intents=intents)
-client.run(DISCORD_TOKEN)
+client.run(DISCORD_TOKEN)   
