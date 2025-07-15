@@ -111,8 +111,8 @@ class Client(commands.Bot):
     async def create_new_room(self, member, after):
         guild = member.guild
         category = after.channel.category
-        channel_name = f"🏠 {member.name}'s Room"
-        
+        channel_name = f"#{len(category.voice_channels)} 🏠 {member.name}'s Room"
+
         # Check if a channel with the same name already exists
         existing_channel = discord.utils.get(guild.voice_channels, name=channel_name, category=category)
         if existing_channel:
