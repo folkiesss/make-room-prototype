@@ -18,8 +18,7 @@ class Client(commands.Bot):
         if message.author == self.user:
             return
 
-        # Check if the message is "hello" and if the author is in a voice channel
-        if not message.author.voice and message.author.voice.channel:
+        if not message.author.voice or not message.author.voice.channel:
             return
         
         if message.channel.category.name != self.category_name:
@@ -31,20 +30,21 @@ class Client(commands.Bot):
         if message.content.startswith("何が好き"):
             await message.channel.send("ウォッカ&ビール よりも　あ・な・た•♡")
 
+    @commands.has_permissions(administrator=True)
     async def on_guild_join(self, guild):
         # The embed to be sent
         print(f"Joined a new guild: {guild.name} (ID: {guild.id})")
         join_embed = discord.Embed(
-            title="🥳 Greeting!",
+            title="Greeting! 🤩",
             description=(
-                "Thanks for adding me to your server! I'm here to help you manage things.\n\n"
+                "Thanks for adding me to your server! I'm here to help you manage things.✨\n\n"
                 "To get started, a moderator can use the `button` below "
                 "to create a deficate category for me to work in."
             ),
             color=discord.Color.orange()
         )
         join_embed.set_footer(text="Let's get this server organized!")
-        join_embed.set_author(name="MakeRoom")
+        join_embed.set_author(name=self.user.name, icon_url=self.user.avatar.url)
 
         create_category_button = discord.ui.Button(
             style=discord.ButtonStyle.primary,
@@ -57,8 +57,13 @@ class Client(commands.Bot):
         view = discord.ui.View()
         view.add_item(create_category_button)
 
-        await guild.system_channel.send(embed=join_embed, view=view)
+        for channel in guild.text_channels:
+            if channel.name == "moderator-only":
+                await channel.send(embed=join_embed, view=view)
+                return
 
+        await guild.system_channel.send(embed=join_embed, view=view)
+            
     async def init_category(self, interaction):
         guild = interaction.guild
         category = discord.utils.get(guild.categories, name=self.category_name)
@@ -93,7 +98,7 @@ class Client(commands.Bot):
         # Create a voice channel in the new category
         try:
             channel = await guild.create_voice_channel("+ Create Room", category=category)
-            channel.set_permissions(guild.default_role, send_messages=False)
+            await channel.set_permissions(guild.default_role, send_messages=False)
         except discord.Forbidden:
             await interaction.response.send_message("I do not have permission to create voice channels.", ephemeral=True)
             return
@@ -146,7 +151,7 @@ class Client(commands.Bot):
         control_embed = discord.Embed(
             title="🪄 Room Control",
             description="Toggle the visibility of this voice channel.",
-            color=discord.Color.light_grey()
+            color=discord.Color.og_blurple()
         )
         control_embed.set_footer(text="Manage your room privacy!")
 
@@ -182,7 +187,7 @@ class Client(commands.Bot):
                 await channel.set_permissions(interaction.guild.default_role, view_channel=False)
                 await channel.set_permissions(interaction.user, view_channel=True)
                 embed = discord.Embed(
-                    title="👻 Room Privacy",
+                    title="😶‍🌫️ Room Privacy",
                     description="This room is now private.",
                     color=discord.Color.red()
                 )
@@ -191,7 +196,7 @@ class Client(commands.Bot):
             else:
                 await channel.set_permissions(interaction.guild.default_role, view_channel=True)
                 embed = discord.Embed(
-                    title="🌳 Room Privacy",
+                    title="🥳 Room Privacy",
                     description="This room is now public.",
                     color=discord.Color.green()
                 )
