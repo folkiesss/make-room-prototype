@@ -30,6 +30,10 @@ class Client(commands.Bot):
         if message.content.startswith("何が好き"):
             await message.channel.send("ウォッカ&ビール よりも　あ・な・た•♡")
 
+        if message.content == "$debug":
+            channel = message.author.voice.channel
+            await message.channel.send(f"Voice channel: {channel.name} (ID: {channel.id})")
+
     @commands.has_permissions(administrator=True)
     async def on_guild_join(self, guild):
         # The embed to be sent
@@ -71,12 +75,15 @@ class Client(commands.Bot):
         # Check if the category already exists
         if category:
             await self.delete_category(interaction)
-        
-        await self.create_category(interaction)
+
+        channel = await self.create_category(interaction)
 
         embed_color = discord.Color.blue() if category else discord.Color.green()
         embed_title = "Category Recreated" if category else "Category Created"
-        embed_description = f"Category '{self.category_name}' created successfully."
+        embed_description = (
+            f"Category '{self.category_name}' created successfully."
+            f"You can now join <#{channel.id}> to create your own voice rooms!"
+        )
 
         embed = discord.Embed(
             title=embed_title,
@@ -99,6 +106,7 @@ class Client(commands.Bot):
         try:
             channel = await guild.create_voice_channel("+ Create Room", category=category)
             await channel.set_permissions(guild.default_role, send_messages=False)
+            return channel
         except discord.Forbidden:
             await interaction.response.send_message("I do not have permission to create voice channels.", ephemeral=True)
             return
