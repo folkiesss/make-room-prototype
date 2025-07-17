@@ -28,7 +28,7 @@ class Client(commands.Bot):
             await message.channel.send("は~い!")
 
         if message.content.startswith("何が好き"):
-            await message.channel.send("ウォッカ&ビール よりも　あ・な・た•♡")
+            await message.channel.send("ウォッカ&ビール よりも　あ・な・た・♡")
 
         if message.content == "$debug":
             channel = message.author.voice.channel
