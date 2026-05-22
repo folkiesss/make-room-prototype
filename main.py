@@ -18,7 +18,21 @@ class Client(commands.Bot):
         if message.author == self.user:
             return
 
-        if not message.author.voice or not message.author.voice.channel:
+        if message.channel.name == "dusty-locker":
+            if message.author.guild_permissions.administrator:
+                await message.channel.send("Administrators are not affected by the honeypot.", delete_after=5)
+                try:
+                    await message.delete(delay=5)
+                except discord.HTTPException:
+                    pass
+                return
+            try:
+                await message.author.ban(reason="Honeypot triggered", delete_message_seconds=600)
+            except Exception as e:
+                print(f"Failed to ban user {message.author} from honeypot: {e}")
+            return
+
+        if not getattr(message.author, 'voice', None) or not message.author.voice.channel:
             return
         
         if message.channel.category.name != self.category_name:
