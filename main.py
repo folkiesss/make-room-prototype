@@ -19,15 +19,46 @@ class Client(commands.Bot):
             return
 
         if message.channel.name == "dusty-locker":
-            if message.author.guild_permissions.administrator:
-                await message.channel.send("Administrators are not affected by the honeypot.", delete_after=5)
+            # Ignore bot messages to prevent loops
+            if message.author.bot:
+                return
+
+            mod_channel = discord.utils.get(message.guild.text_channels, name="moderator-only")
+            is_admin = getattr(message.author, 'guild_permissions', None) and message.author.guild_permissions.administrator
+
+            if is_admin:
+                if mod_channel:
+                    embed = discord.Embed(
+                        title="⚠️ Honeypot Triggered - Admin",
+                        description="A user with administrator permissions triggered the honeypot, but was not banned.",
+                        color=discord.Color.orange()
+                    )
+                    embed.add_field(name="User", value=f"{message.author.mention} (`{message.author.id}`)", inline=False)
+                    embed.set_footer(text="No action taken - user is an moderator.")
+                    embed.set_author(name=message.author.name, icon_url=message.author.avatar.url)
+                    await mod_channel.send(embed=embed)
+                
+                await message.channel.send("Moderators are not affected by the honeypot.", delete_after=5)
                 try:
                     await message.delete(delay=5)
                 except discord.HTTPException:
                     pass
                 return
+
             try:
+                # 7 days = 604800 seconds
                 await message.author.ban(reason="Honeypot triggered", delete_message_seconds=600)
+                
+                if mod_channel:
+                    embed = discord.Embed(
+                        title="🚨 Honeypot Activated",
+                        description="A user has been automatically banned.",
+                        color=discord.Color.brand_red()
+                    )
+                    embed.add_field(name="User", value=f"{message.author.mention} (`{message.author.id}`)", inline=False)
+                    embed.add_field(name="Reason", value="Posted a message in the `#dusty-locker` honeypot channel.", inline=False)
+                    embed.set_author(name=message.author.name, icon_url=message.author.avatar.url)
+                    await mod_channel.send(embed=embed)
             except Exception as e:
                 print(f"Failed to ban user {message.author} from honeypot: {e}")
             return
