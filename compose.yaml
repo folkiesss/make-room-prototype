@@ -1,7 +1,9 @@
 services:
   makeroom:
-    container_name: makeroom-bot
+    container_name: makeroom-bot-dev
     build: .
-    environment:
-      - DISCORD_TOKEN=${DISCORD_TOKEN}
+    env_file:
+      - .env.dev
+    # environment:
+    #   - DISCORD_TOKEN=${DISCORD_TOKEN}
     restart: unless-stopped
