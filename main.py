@@ -60,10 +60,10 @@ class Client(discord.Client):
 
         # Text Triggers
         if message.content == str(self.user.name):
-            await message.channel.send("は~い!")
+            await message.channel.send("は~い!", ephemeral=True)
 
         if message.content.startswith("何が好き"):
-            await message.channel.send("ウォッカ&ビール よりも あ・な・た・♡")
+            await message.channel.send("ウォッカ&ビール よりも あ・な・た・♡", ephemeral=True)
 
     async def on_guild_join(self, guild):
         logger.info(f"Joined a new guild: {guild.name} (ID: {guild.id})")
