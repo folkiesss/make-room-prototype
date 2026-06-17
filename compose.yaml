@@ -4,5 +4,4 @@ services:
     build: .
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
-      - PYTHONUNBUFFERED=1
     restart: unless-stopped
