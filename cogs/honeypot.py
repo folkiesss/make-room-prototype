@@ -55,9 +55,17 @@ class HoneypotCog(commands.Cog):
             if mod_channel:
                 embed = discord.Embed(
                     title="⚠️ Honeypot Triggered - Admin",
-                    description=f"{message.author.mention} triggered the honeypot, but was not banned.",
+                    description="A user with administrator permissions triggered the honeypot, but was not banned.",
                     color=discord.Color.orange()
                 )
+                embed.add_field(name="User", value=f"{message.author.mention} (`{message.author.id}`)", inline=False)
+                embed.set_footer(text="No action taken - user is a moderator.")
+
+                if message.author.avatar:
+                    embed.set_author(name=message.author.name, icon_url=message.author.avatar.url)
+                else:
+                    embed.set_author(name=message.author.name)
+
                 await mod_channel.send(embed=embed)
                 
             await message.channel.send("Moderators are not affected by the honeypot.", delete_after=5)
@@ -74,9 +82,17 @@ class HoneypotCog(commands.Cog):
             if mod_channel:
                 embed = discord.Embed(
                     title="🚨 Honeypot Activated",
-                    description=f"{message.author.mention} has been automatically banned.",
+                    description="A user has been automatically banned.",
                     color=discord.Color.brand_red()
                 )
+                embed.add_field(name="User", value=f"{message.author.mention} (`{message.author.id}`)", inline=False)
+                embed.add_field(name="Reason", value="Posted a message in the `#dusty-locker` honeypot channel.", inline=False)
+
+                if message.author.avatar:
+                    embed.set_author(name=message.author.name, icon_url=message.author.avatar.url)
+                else:
+                    embed.set_author(name=message.author.name)
+                    
                 await mod_channel.send(embed=embed)
         except Exception as e:
             logger.error(f"Failed to ban user {message.author}: {e}")
