@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord import app_commands
 import logging
 
 logger = logging.getLogger('MakeRoomBot')
@@ -69,6 +70,8 @@ class MakeRoom(commands.Cog):
                     # usually leaves last anyway)
                     await before.channel.set_permissions(member, overwrite=None)
 
+    @app_commands.command(name="init_category", description="Create the MakeRoom temporary voice category.")
+    @app_commands.checks.has_permissions(administrator=True)
     async def init_category(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
         guild = interaction.guild
